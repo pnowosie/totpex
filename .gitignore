@@ -21,3 +21,5 @@ erl_crash.dump
 
 # Remove generated binary
 totpex
+
+.elixir_ls/

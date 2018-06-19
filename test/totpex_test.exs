@@ -6,6 +6,34 @@ defmodule TotpexTest do
   #  - HOTP, 4226: https://tools.ietf.org/html/rfc4226
   #  - TOTP, 6238: https://tools.ietf.org/html/rfc6238
 
+  setup do
+    %{
+      test_vectors: [
+        # { unix_timestamp, date_string, expected_token, hash_alg }
+        {59, "1970-01-01 00:00:59", "287082", :sha},
+        {59, "1970-01-01 00:00:59", "119246", :sha256},
+        {59, "1970-01-01 00:00:59", "693936", :sha512},
+        {59, "1970-01-01 00:00:59", "94287082", :sha},
+        {59, "1970-01-01 00:00:59", "46119246", :sha256},
+        {59, "1970-01-01 00:00:59", "90693936", :sha512},
+
+        {1111111109, "2005-03-18 01:58:29", "081804", :sha},
+        {1111111109, "2005-03-18 01:58:29", "084774", :sha256},
+        {1111111109, "2005-03-18 01:58:29", "091201", :sha512},
+        {1111111109, "2005-03-18 01:58:29", "07081804", :sha},
+        {1111111109, "2005-03-18 01:58:29", "68084774", :sha256},
+        {1111111109, "2005-03-18 01:58:29", "25091201", :sha512},
+
+        {1111111111, "2005-03-18 01:58:31", "050471", :sha},
+        {1111111111, "2005-03-18 01:58:31", "062674", :sha256},
+        {1111111111, "2005-03-18 01:58:31", "943326", :sha512},
+        {1111111111, "2005-03-18 01:58:31", "14050471", :sha},
+        {1111111111, "2005-03-18 01:58:31", "67062674", :sha256},
+        {1111111111, "2005-03-18 01:58:31", "99943326", :sha512},
+
+      ]
+    }
+  end
 
   # Test vectors: https://tools.ietf.org/html/rfc6238#page-14
   # +-------------+--------------+------------------+----------+--------+
@@ -52,11 +80,11 @@ defmodule TotpexTest do
   test "Rfc test vectors test" do
     rawkey = "12345678901234567890"
     secret = Base.encode32(rawkey)
-    assert "94287082" == Totpex.generate_totp(secret, 59, 8)
-    assert "07081804" == Totpex.generate_totp(secret, 1111111109, 8)
-    assert "14050471" == Totpex.generate_totp(secret, 1111111111, 8)
-    assert "89005924" == Totpex.generate_totp(secret, 1234567890, 8)
-    assert "69279037" == Totpex.generate_totp(secret, 2000000000, 8)
-    assert "65353130" == Totpex.generate_totp(secret, 20000000000, 8)
+    assert "94287082" == Totpex.generate_totp(secret, 59, length: 8)
+    assert "07081804" == Totpex.generate_totp(secret, 1111111109, length: 8)
+    assert "14050471" == Totpex.generate_totp(secret, 1111111111, length: 8)
+    assert "89005924" == Totpex.generate_totp(secret, 1234567890, length: 8)
+    assert "69279037" == Totpex.generate_totp(secret, 2000000000, length: 8)
+    assert "65353130" == Totpex.generate_totp(secret, 20000000000, length: 8)
   end
 end
