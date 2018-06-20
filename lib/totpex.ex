@@ -4,13 +4,7 @@ defmodule Totpex do
   Official specification: https://tools.ietf.org/html/rfc6238
   """
 
-  defp generate_hmac(secret, timesteps, hash_alg) do
-  # Clean unwanted character from the secret and decode it using Base32 "encoding"
-    key = secret
-          |> String.replace(" ", "")
-          |> String.upcase
-          |> Base.decode32!
-
+  defp generate_hmac(key, timesteps, hash_alg) do
     # Generate the moving mactor
     moving_factor = timesteps
                     |> Integer.to_string(16)
@@ -24,7 +18,8 @@ defmodule Totpex do
 
   defp hmac_dynamic_truncation(hmac) do
     # Get the offset from last  4-bits
-    <<_::19-binary, _::4, offset::4>> = hmac
+    size_but_last = byte_size(hmac)-1
+    <<_::size(size_but_last)-binary, _::4, offset::4>> = hmac
 
     # Get the 4-bytes starting from the offset
     <<_::size(offset)-binary, p::4-binary, _::binary>> = hmac
@@ -52,12 +47,12 @@ defmodule Totpex do
   Generate Time-Based One-Time Password.
   The default period used to calculate the moving factor is 30s
   """
-  def generate_totp(secret, unixtime, keywords \\ []) do
+  def generate_totp(key, unixtime, keywords \\ []) do
     hash_alg = Keyword.get(keywords, :hash, :sha)
     length = Keyword.get(keywords, :length, 6)
     timesteps = calculate_timesteps(unixtime, 0, 30)
 
-    secret
+    key
     |> generate_hmac(timesteps, hash_alg)
     |> hmac_dynamic_truncation
     |> generate_hotp(length)
